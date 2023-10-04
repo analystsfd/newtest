@@ -55,3 +55,4 @@ rules:
     where: ["license=*"]
     rule:
       type: license-detectable-by-licensee
+    
