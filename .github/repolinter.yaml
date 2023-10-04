@@ -54,5 +54,4 @@ rules:
     level: error
     where: ["license=*"]
     rule:
-      type: license-detectable-by-licensee
-    
+      type: license-detectable-by-licensee 
