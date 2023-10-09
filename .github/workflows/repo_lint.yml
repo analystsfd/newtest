@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup node for repolinter
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
 
       - name: Setup ruby for license checker
         uses: ruby/setup-ruby@v1
@@ -20,11 +20,11 @@ jobs:
         run: |
           npm install -g repolinter
           gem install licensee
-        
+
       - name: Checkout
-        uses: actions/checkout@v3  
-        
-      - uses: tibdex/github-app-token@v1
+        uses: actions/checkout@v4
+
+      - uses: tibdex/github-app-token@v2
         id: get_installation_token
         with:
           app_id: 367464
