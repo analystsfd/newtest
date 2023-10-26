@@ -2,8 +2,8 @@
 name: Run repolint
 on:
   workflow_dispatch: null
-  schedule:
-   - cron: '*/5 * * * *'
+  # schedule:
+  # - cron: '*/5 * * * *'
   #  - cron: '0 0 * * *'
 jobs:
   run-script:
