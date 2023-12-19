@@ -8,6 +8,7 @@
    - Contact the current project maintainer to identify the second GIAM group necessary for repository access.
 
 Remember to use your personal GitHub account, not the auto-generated EMU (GitHub Enterprise Managed User), identifiable with 
-a name pattern like `firstname-lastname_allianz`. EMU accounts are limited to internal development and should not be used for 
+a name pattern like `firstname-lastname_allianz`. EMU accounts are limited to internal development and cannot be used for 
 open source contributions. Integrate your Allianz email into your GitHub account for proper contribution identification within 
 the company context.
+ä
