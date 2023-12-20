@@ -10,6 +10,6 @@ At Allianz, we support open source initiatives through an open community. From m
 
 Directory
 
-* Engaging with Allianz Open Source Software
-* Becoming a Maintainer
+* [Engaging with Allianz Open Source Software](./guides/engage.md)
+* [Becoming a Maintainer ](./guides/engage.md)
 * Releasing Open Source Steps
