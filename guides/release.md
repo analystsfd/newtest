@@ -41,7 +41,7 @@ in a `NOTICE` file.
      ```
 
 6. **Publish the code**. Once business approval is granted and code is prepared, create an issue in `XXX` repo and request that a new GitHub repository is created
-7. **Going forward**. Ensure:
+7. **Going forward**.
    - **Staffing**. Ensure at least one team member is committed to managing community interactions merging pull requests, giving feedback, releasing new versions.
    - **Maintaining**. Make your life easier as an open source maintainer, [from documenting processes to leveraging your community](https://opensource.guide/best-practices/).
    - **Build welcoming communities**. [Build a community that encourages people](https://opensource.guide/building-community/) to use, contribute to, and share your project.
@@ -49,4 +49,4 @@ in a `NOTICE` file.
 
 ## Attribution
 
-This release process is adapted from the GitHub [relase process template](https://github.com/github/github-ospo/blob/main/policies/releasing.md) and the [Yahoo release process](https://yahoo.github.io/oss-guide/docs/publishing/prepare.html)
+This release process is adapted from the GitHub [release process template](https://github.com/github/github-ospo/blob/main/policies/releasing.md) and the [Yahoo release process](https://yahoo.github.io/oss-guide/docs/publishing/prepare.html)
