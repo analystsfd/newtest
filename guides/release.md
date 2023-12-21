@@ -2,7 +2,7 @@
 
 The following steps must be taken to release a new open source project:
 
-1. **Register your release**. Complete the registration form to express your intent to release non-product code (such as utility libraries, tools, and sample code).
+1. **Register your release**. Complete the [registration form](https://forms.office.com/e/6CWzqV1FYe) to express your intent to release non-product code (such as utility libraries, tools, and sample code).
 2. **Get approval**. Obtain business line approval.
 
 3. **Name your project**. 
