@@ -49,6 +49,4 @@ in a `NOTICE` file.
 
 ## Attribution
 
-This release process is adapted from the GitHub [relase process template](https://github.com/github/github-ospo/blob/main/policies/releasing.md) and the [Yahoo release process](https://yahoo.github.io/oss-guide/docs/publishing/approval.html)
-
-Content licensed under CC-BY-4.0
+This release process is adapted from the GitHub [relase process template](https://github.com/github/github-ospo/blob/main/policies/releasing.md) and the [Yahoo release process](https://yahoo.github.io/oss-guide/docs/publishing/prepare.html)
