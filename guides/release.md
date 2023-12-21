@@ -47,5 +47,8 @@ in a `NOTICE` file.
    - **Build welcoming communities**. [Build a community that encourages people](https://opensource.guide/building-community/) to use, contribute to, and share your project.
 
 
+## Attribution
 
+This release process is adapted from the GitHub [relase process template](https://github.com/github/github-ospo/blob/main/policies/releasing.md) and the [Yahoo release process](https://yahoo.github.io/oss-guide/docs/publishing/approval.html)
 
+Content licensed under CC-BY-4.0
