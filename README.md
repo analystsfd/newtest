@@ -12,4 +12,5 @@ Directory
 
 * [Engaging with Allianz Open Source Software](./guides/engage.md)
 * [Becoming a Maintainer ](./guides/maintainer.md)
-* Releasing Open Source Steps
+* [Releasing Open Source Steps](./guides/release.md)
+* 
