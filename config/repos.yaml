@@ -1,0 +1,35 @@
+repositories:
+  - name: ".github"
+    stage: allianz
+  - name: "ospo"
+    stage: allianz
+  - name: "new-project"
+    stage: allianz-incubator
+  - name: "ng-aquila"
+    stage: allianz
+  - name: "calculus-prime-pnc"
+    stage: allianz
+  - name: "gem-config"
+    stage: allianz
+  - name: "license-scout"
+    stage: allianz
+  - name: "merge-bot"
+    stage: allianz
+  - name: "merge-bot-config"
+    stage: allianz
+  - name: "merge-processor"
+    stage: allianz
+  - name: "test-permissions"
+    stage: allianz-incubator
+    teams:
+      - name: "no-ad-test"
+  - name: "playground"
+    stage: allianz-incubator
+    teams:
+       - name: "asdf"
+       - name: "ospo"
+
+
+team-sync:
+  - name: "ospo"
+    giam: "Allianz OSPO"
