@@ -3,7 +3,7 @@
 # Linting all repositories of a Github organization
 #
 # Usage:
-#   ./lint-repos.sh <organization_name> [--dry_run]
+#   ./lint_repos.sh <organization_name> [--dry_run]
 #
 # Parameters:
 #   organization_name: The name of the organization on GitHub.
@@ -54,7 +54,7 @@ done
 # Checks if an issue is open and returns the issue number.
 #
 # Usage:
-#   issue_exists <repo> <issue_title>
+#   issue_number <repo> <issue_title>
 #
 # Returns:
 #   The issue number if an open issue with the specified title exists, otherwise, returns empty.

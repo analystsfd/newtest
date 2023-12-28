@@ -34,4 +34,4 @@ jobs:
       - name: Lint Allianz Repos
         env:
           GH_TOKEN: ${{ steps.get_installation_token.outputs.token }}
-        run: scripts/lint-repos.sh allianz --dry-run
+        run: scripts/lint_repos.sh allianz --dry-run
