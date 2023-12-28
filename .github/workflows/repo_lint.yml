@@ -31,7 +31,7 @@ jobs:
           app_id: 367464
           private_key: ${{ secrets.PRIVATE_KEY }}
 
-      - name: Lint Repos
+      - name: Lint Allianz Repos
         env:
           GH_TOKEN: ${{ steps.get_installation_token.outputs.token }}
-        run: repolinter/lint-repos.sh
+        run: scripts/lint-repos.sh allianz --dry-run
