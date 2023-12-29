@@ -47,14 +47,6 @@ validate_config() {
         fi
     done
 
-        # Validate team names
-    for team_name in $(yq eval '.repositories[].teams[].name' "$YAML_FILE"); do
-        if [[ ! "$team_name" =~ ^[a-z0-9._-]+$ ]]; then
-            echo "Invalid team name: '$team_name'. The name must match the pattern [a-z0-9._-]+$."
-            exit 1
-        fi
-    done
-
     # Validate stages
     for stage in $(yq eval '.repositories[].stage' "$YAML_FILE"); do
         if [[ "$stage" != "allianz" && "$stage" != "allianz-incubator" ]]; then
@@ -99,8 +91,9 @@ transfer_repo() {
 create_team() {
     local name=$1
     local org=$2
-    local giam_name=$(yq eval '.team-sync[] | select(.name == "'"$name"'") | .giam' $YAML_FILE)
+    local giam_name=$name
 
+    # Get AD group for team sync
     ad_group=$(gh api -XGET \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -112,6 +105,7 @@ create_team() {
         exit 1
     fi
 
+    # Create team
     if [ "$dry_run" = true ]; then
         dry_run_messages+="\e[32m+\e[0m Would create team: '$name' in $org.\n"
     else
@@ -129,6 +123,10 @@ create_team() {
         fi
     fi
 
+    # Update cache to include new group
+    fill_teams_cache
+
+    # Add AD group to team to activate team sync
     if [ "$dry_run" = true ]; then
         dry_run_messages+="\e[32m+\e[0m Would setup team sync: team '$name' with AD Group '$giam_name'.\n"
     else
@@ -136,13 +134,13 @@ create_team() {
           --method PATCH   \
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          /orgs/allianz-incubator/teams/$name/team-sync/group-mappings \
+          /orgs/allianz-incubator/teams/$(get_team_slug $name)/team-sync/group-mappings \
           --input -)
         
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' successfully syncing with AD Group '$giam_name'."
         else
-            echo "❌ Error when syncing team with AD."
+            echo "❌ Error when enabling team sync with AD."
         fi
     fi
 }
@@ -158,7 +156,7 @@ delete_team() {
         --method DELETE \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        /orgs/$org/teams/$name) 
+        /orgs/$org/teams/$(get_team_slug $name)) 
         
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' deleted successfully in organization '$org'."
@@ -181,7 +179,7 @@ add_team_to_repo() {
             --method PUT \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /orgs/$org/teams/$name/repos/$org/$repo \
+            /orgs/$org/teams/$(get_team_slug $name)/repos/$org/$repo \
             -f permission='push')
 
             if [ $? -eq 0 ]; then
@@ -206,7 +204,7 @@ remove_team_from_repo() {
             --method DELETE \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /orgs/$org/teams/$name/repos/$org/$repo)
+            /orgs/$org/teams/$(get_team_slug $name)/repos/$org/$repo)
 
             if [ $? -eq 0 ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' removed owner prermissions in repository '$repo'."
@@ -291,13 +289,45 @@ process_repos() {
     done
 }
 
+fill_teams_cache() {
+    CACHED_ALLIANZ_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz/teams)
+    CACHED_ALLIANZ_INCUBATOR_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz-incubator/teams)
+}
+
+get_teams(){
+    org="$1"
+
+    if [ "$org" == "allianz" ]; then
+        echo "$CACHED_ALLIANZ_TEAMS"
+    else
+        echo "$CACHED_ALLIANZ_INCUBATOR_TEAMS"
+    fi
+}
+
+get_team_slug(){
+    name="$1"
+
+    # Search for the team in both organizations
+    slug_allianz=$(jq -r '.[] | select(.name == "'"$name"'") | .slug' <<< "$CACHED_ALLIANZ_TEAMS")
+    slug_incubator=$(jq -r '.[] | select(.name == "'"$name"'") | .slug' <<< "$CACHED_ALLIANZ_INCUBATOR_TEAMS")
+
+    # Return the first non-empty slug found
+    if [ -n "$slug_allianz" ]; then
+        echo "$slug_allianz"
+    elif [ -n "$slug_incubator" ]; then
+        echo "$slug_incubator"
+    else
+        echo "Team slug not found for $name"
+        exit 1
+    fi
+}
 
 process_teams() {
     org_name="$1"
     echo -e "READING $org_name TEAMS..."
     
     # Status
-    existing_teams=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/$org_name/teams | jq -r '.[].slug')
+    existing_teams=$(get_teams $org_name | jq -r '.[].name')
     desired_teams=$(yq eval '.repositories[] | select(.stage == "'"$org_name"'") | .teams[].name' "$YAML_FILE" | sort -u)
 
     # Changes
@@ -373,6 +403,7 @@ process_teams() {
 }
 
 # Run
+fill_teams_cache
 validate_config
 process_repos
 process_teams allianz
@@ -386,7 +417,6 @@ fi
 
 # Print dry run results
 if [ "$dry_run" = true ]; then
-    echo -e "\nPlanned changes:\n$dry_run_messages"
-    
+    echo -e "\nPlanned changes:\n$dry_run_messages" 
 fi
 

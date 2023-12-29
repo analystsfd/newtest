@@ -27,9 +27,4 @@ repositories:
     stage: allianz-incubator
     teams:
        - name: "asdf"
-       - name: "ospo"
-
-
-team-sync:
-  - name: "ospo"
-    giam: "Allianz OSPO"
+       - name: "Allianz OSPO"
