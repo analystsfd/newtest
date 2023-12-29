@@ -39,7 +39,7 @@ shift
 dry_run=false
 while [ $# -gt 0 ]; do
     case "$1" in
-        --dry_run)
+        --dry-run)
             DRY_RUN=true
             ;;
         *)
