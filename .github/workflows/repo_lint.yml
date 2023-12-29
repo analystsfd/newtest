@@ -29,9 +29,9 @@ jobs:
         id: get_installation_token
         with:
           app_id: ${{ secrets.BOT_APP_ID }}
-          private_key: ${{ secrets.BOTT_PRIVATE_KEY }}
+          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
 
       - name: Lint Allianz Repos
         env:
           GH_TOKEN: ${{ steps.get_installation_token.outputs.token }}
-        run: scripts/lint_repos.sh allianz --dry-run
+        run: scripts/lint_repos.sh allianz-incubator --dry-run
