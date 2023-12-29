@@ -62,7 +62,7 @@ issue_number() {
   local repo="$1"
   local issue_title="$2"
 
-  gh issue list -R "$REPO" --state open --json number,title |  jq -r ".[] | select(.title == \"$$issue_title\") | .number"
+  gh issue list -R "$repo" --state open --json number,title |  jq -r ".[] | select(.title == \"$issue_title\") | .number"
 }
 
 
@@ -79,15 +79,15 @@ create_issue_if_not_exists() {
   local issue_title="$2"
   local issue_body=$(echo -e "$3")
 
-  if [ "$DRY_RUN" = true ]; then
-    DRY_RUN_MESSAGES+="Dry run: Would create an issue for repository '$repo'.\n"
+  existing_issue_number=$(issue_number "$repo" "$issue_title")
+  if [ -z "$existing_issue_number" ]; then
+      if [ "$DRY_RUN" = true ]; then
+        DRY_RUN_MESSAGES+="Dry run: Would create an issue for repository '$repo'.\n"
+      else
+        gh issue create -R "$repo" --title "$issue_title" --body "$issue_body"
+      fi
   else
-    existing_issue_number=$(issue_number "$repo" "$issue_title")
-    if [ -z "$existing_issue_number" ]; then
-      gh issue create -R "$repo" --title "$issue_title" --body "$issue_body"
-    else
-      echo "An open issue already exists in the repository '$repo'. Skipping creation."
-    fi
+    echo "An open issue already exists in the repository '$repo'. Skipping creation."
   fi
 }
 
