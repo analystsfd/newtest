@@ -18,6 +18,6 @@ jobs:
       - name: Create repositories and teams
         env:
           GH_TOKEN: ${{ steps.get_installation_token.outputs.token }}
-        run: scripts/create_repos.sh
+        run: scripts/create_repos.sh --debug
 
 
