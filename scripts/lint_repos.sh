@@ -135,16 +135,14 @@ get_repolinter_config() {
 #
 lint_repos() {
   local org_name="$1"
+  mkdir -p "$OUTPUT_DIR/$org_name"
 
   # Loop through each repository and perform linting
   local repos=$(gh repo list "$org_name" --visibility public --no-archived -L 100 | awk '{print $1}')
   for repo in $repos; do
       echo
       echo "Linting the repository '$repo'..."
-      
-      # Create directory for lint output for each repo
-      mkdir -p "$OUTPUT_DIR/$repo"
-      
+          
       # Run repolinter on the repository
       repolinter -g "https://github.com/$repo" -f markdown -u <(get_repolinter_config "$repo") > "$OUTPUT_DIR/$repo.md"
       
