@@ -2,6 +2,7 @@
 cd "$(dirname "$0")"
 IFS=$'\n' # keep whitespace when iterating with for loops
 
+
 YAML_FILE="../config/repos.yaml"
 
 # Install yq and gh (if not already installed)
@@ -37,6 +38,7 @@ print_debug() {
     fi
 }
 
+
 validate_config() {
 
     # Validate repository names
@@ -64,6 +66,12 @@ create_repo() {
         dry_run_messages+="\e[32m+\e[0m Would create repository: $name in $org.\n"
     else
         gh repo create $org/$name --public --template="allianz-incubator/new-project"
+
+        if [ $? -eq 0 ]; then
+            echo -e "\e[32m✓\e[0m Repository '$name' successfully created in organization $org."
+        else
+            echo "Error creating repo. $response."; exit 1;
+        fi
     fi
 }
 
@@ -83,7 +91,7 @@ transfer_repo() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Repository '$name' successfully transfered to organization allianz."
         else
-            echo "❌ Error creating team."
+            echo "Error transfering team. $response."; exit 1;
         fi
     fi
 }
@@ -119,7 +127,7 @@ create_team() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' created successfully in organization '$org'."
         else
-            echo "❌ Error creating team."
+            echo "Error creating team. $response."; exit 1;
         fi
     fi
 
@@ -140,7 +148,7 @@ create_team() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' successfully syncing with AD Group '$giam_name'."
         else
-            echo "❌ Error when enabling team sync with AD."
+            echo "Error when enabling team sync with AD. $response."; exit 1;
         fi
     fi
 }
@@ -161,7 +169,7 @@ delete_team() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' deleted successfully in organization '$org'."
         else
-            echo "❌ Error deleting team."
+            echo "Error deleting team. $response."; exit 1;
         fi
     fi
 }
@@ -185,7 +193,7 @@ add_team_to_repo() {
             if [ $? -eq 0 ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' granted owner prermissions in repository '$repo'."
             else
-                echo "❌ Error granting permissions."
+                echo "Error granting permissions. $response"; exit 1;
             fi
         fi
     done
@@ -209,24 +217,21 @@ remove_team_from_repo() {
             if [ $? -eq 0 ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' removed owner prermissions in repository '$repo'."
             else
-                echo "❌ Error removing permissions."
+                echo "Error removing permissions. $repsonse"; exit 1;
             fi
         fi
     done
 }
 
-# Function to get additional values from the config file based on repository name
-get_additional_values() {
-    repo_name="$1"
-    yq eval '.repositories[] | select(.name == "'"$repo_name"'")' "$YAML_FILE"
-}
 
 process_repos() {
     echo "READING REPOSITORIES..."
 
     # Status
-    existing_incubator_repos=$(gh repo list allianz-incubator --json name --limit 1000 | jq -r '.[].name' | sort)
-    existing_main_repos=$(gh repo list allianz --json name --limit 1000 | jq -r '.[].name' | sort)
+    existing_incubator_repos=$(gh repo list allianz-incubator --json name --limit 1000 | jq -r '.[].name' | sort)|| {
+        echo "Error fetching repos for allianz. $existing_incubator_repos."; exit 1; }
+    existing_main_repos=$(gh repo list allianz --json name --limit 1000 | jq -r '.[].name' | sort)|| {
+        echo "Error fetching repos for allianz. $existing_main_repos."; exit 1; }
     desired_incubator_repos=$(yq eval '.repositories[] | select(.stage == "allianz-incubator") | .name' "$YAML_FILE" | sort -u)
     desired_main_repos=$(yq eval '.repositories[] | select(.stage == "allianz") | .name' "$YAML_FILE" | sort -u)
 
@@ -262,19 +267,16 @@ process_repos() {
 
     # Iterate over the list of repositories to add in incubator
     for repo in $repos_to_add_in_incubator; do
-        additional_values=$(get_additional_values "$repo")
         create_repo $repo "allianz-incubator"
     done
 
     # Iterate over the list of repositories to add in main
     for repo in $repos_to_add_in_main; do
-        additional_values=$(get_additional_values "$repo")
         create_repo $repo "allianz"
     done
 
     # Iterate over the list of repositories to transfer to main
     for repo in $repos_to_transfer_to_main; do
-        additional_values=$(get_additional_values "$repo")
         transfer_repo $repo
     done
 
@@ -290,8 +292,10 @@ process_repos() {
 }
 
 fill_teams_cache() {
-    CACHED_ALLIANZ_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz/teams)
-    CACHED_ALLIANZ_INCUBATOR_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz-incubator/teams)
+    CACHED_ALLIANZ_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz/teams) || {
+        echo "Error fetching teams for allianz. $CACHED_ALLIANZ_TEAMS."; exit 1; }
+    CACHED_ALLIANZ_INCUBATOR_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz-incubator/teams) || {
+        echo "Error fetching teams for allianz-incubator. $CACHED_ALLIANZ_INCUBATOR_TEAMS."; exit 1; }
 }
 
 get_teams(){
@@ -367,7 +371,8 @@ process_teams() {
     for team in $teams_to_update; do
 
         # Status
-        existing_repos_for_team=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/orgs/allianz-incubator/teams/$team/repos?per_page=100" | jq -c '.[].name' | sed 's/"//g')
+        existing_repos_for_team=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/orgs/allianz-incubator/teams/$team/repos?per_page=100" | jq -c '.[].name' | sed 's/"//g') || {
+            echo "Error fetching repositories for teams for allianz. $existing_repos_for_team."; exit 1; }
         desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' ../config/repos.yaml | sort -u)
         
         # Debug
