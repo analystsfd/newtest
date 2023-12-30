@@ -1,0 +1,23 @@
+---
+name: Run create repos
+on:
+  workflow_dispatch: null
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: tibdex/github-app-token@v2
+        id: get_installation_token
+        with:
+          app_id: ${{ secrets.BOT_APP_ID }}
+          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - name: Create repositories and teams
+        env:
+          GH_TOKEN: ${{ steps.get_installation_token.outputs.token }}
+        run: scripts/create_repos.sh
+
+
