@@ -294,6 +294,7 @@ process_repos() {
 fill_teams_cache() {
     CACHED_ALLIANZ_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz/teams) || {
         echo "Error fetching teams for allianz. $CACHED_ALLIANZ_TEAMS."; exit 1; }
+    echo "Allianz teams: $CACHED_ALLIANZ_TEAMS"
     CACHED_ALLIANZ_INCUBATOR_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz-incubator/teams) || {
         echo "Error fetching teams for allianz-incubator. $CACHED_ALLIANZ_INCUBATOR_TEAMS."; exit 1; }
 }
