@@ -3,28 +3,6 @@ cd "$(dirname "$0")"
 IFS=$'\n' # keep whitespace when iterating with for loops
 
 
-echo "start"
- 
-
-    
-echo "--------------------------"
-ad=$(gh api -XGET \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    -F q="Allianz OSPO" /orgs/allianz-incubator/team-sync/groups)
-echo "--------------------------"
-
-echo $ad | gh api \
-          --method PATCH   \
-          -H "Accept: application/vnd.github+json" \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          /orgs/allianz-incubator/teams/asdf/team-sync/group-mappings \
-          --input -
-    
-echo "done"
-
-exit 1
-
 YAML_FILE="../config/repos.yaml"
 
 # Install yq and gh (if not already installed)
