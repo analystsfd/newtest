@@ -20,9 +20,6 @@ cd "$(dirname "$0")"
 GLOBAL_CONFIG_URL="https://raw.githubusercontent.com/allianz/ospo/main/config/policies.yaml"
 OUTPUT_DIR="../results"
 
-# Clean up previous run
-rm -Rf $OUTPUT_DIR
-
 # Check setup
 if ! command -v repolinter &> /dev/null || ! command -v gh &> /dev/null; then
     echo "repolinter and gh are required. Please install them before running the script."
@@ -30,15 +27,15 @@ if ! command -v repolinter &> /dev/null || ! command -v gh &> /dev/null; then
 fi
 
 # Parse command line parameters
-if [ $# -eq 0 ]; then
-    echo "Please provide the organization name as a command-line argument."
-    exit 1
-fi
-ORG_NAME=$1
-shift
-dry_run=false
+ORG_NAME=""
+DRY_RUN=false
+
 while [ $# -gt 0 ]; do
     case "$1" in
+        --org)
+            shift
+            ORG_NAME=$1
+            ;;
         --dry-run)
             DRY_RUN=true
             ;;
@@ -49,6 +46,12 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+
+# Check if organization name is provided
+if [ -z "$ORG_NAME" ]; then
+    echo "Please provide the organization name using --org option."
+    exit 1
+fi
 
 
 # Checks if an issue is open and returns the issue number.
@@ -135,6 +138,7 @@ get_repolinter_config() {
 #
 lint_repos() {
   local org_name="$1"
+  rm -Rf $OUTPUT_DIR/$org_name
   mkdir -p "$OUTPUT_DIR/$org_name"
 
   # Loop through each repository and perform linting
