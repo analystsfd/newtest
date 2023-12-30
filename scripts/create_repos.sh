@@ -408,9 +408,9 @@ process_teams() {
 }
 
 # Run
-fill_teams_cache
 validate_config
 process_repos
+fill_teams_cache
 process_teams allianz
 process_teams allianz-incubator
 
