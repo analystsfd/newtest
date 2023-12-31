@@ -3,11 +3,11 @@
 # Linting all repositories of a Github organization
 #
 # Usage:
-#   ./lint_repos.sh <organization_name> [--dry_run]
+#   ./lint_repos.sh --org <organization_name> [--dry-run]
 #
 # Parameters:
-#   organization_name: The name of the organization on GitHub.
-#   --dry_run: Optional flag to simulate script execution without making changes.
+#   --org: The name of the organization on GitHub.
+#   --dry-run: Optional flag to simulate script execution without making changes.
 #
 # Description:
 #   This script retrieves a list of public repositories in the specified GitHub organization
@@ -55,12 +55,6 @@ fi
 
 
 # Checks if an issue is open and returns the issue number.
-#
-# Usage:
-#   issue_number <repo> <issue_title>
-#
-# Returns:
-#   The issue number if an open issue with the specified title exists, otherwise, returns empty.
 issue_number() {
   local repo="$1"
   local issue_title="$2"
@@ -70,13 +64,6 @@ issue_number() {
 
 
 # Creates a new GitHub issue or skips the creation if one already exists.
-#
-# Usage:
-#   create_issue_if_not_exists <repo> <issue_title> <issue_body>
-#
-# Dry Run:
-#   If --dry_run option is set, the function prints a message about the planned action
-#   without actually creating or updating the issue.
 create_issue_if_not_exists() {
   local repo="$1"
   local issue_title="$2"
@@ -96,9 +83,6 @@ create_issue_if_not_exists() {
 
 
 # Closes an open GitHub issue with a given title.
-#
-# Usage:
-#   close_issue <repo> <issue_title>
 close_issue() {
   local repo="$1"
   local issue_title="$2"
@@ -113,11 +97,15 @@ close_issue() {
 
 # Retrieves the repolinter configuration for a GitHub repository to be scanned.
 #
-# Usage:
-#   get_repolinter_config <repo>
+# Description:
+#   This function fetches the repolinter configuration for a given GitHub repository. It first
+#   checks if the repository provides a local configuration file at
+#   "https://raw.githubusercontent.com/<repository>/main/.github/repolinter.yaml." If found,
+#   this local configuration is retrieved. If no local configuration exists, the function falls
+#   back to the global configuration specified by GLOBAL_CONFIG_URL.
 #
-# Returns:
-#   The repolinter configuration for the specified repository.
+#   The purpose of this function is to allow repositories to have custom linting configurations,
+#   providing flexibility for different projects while ensuring a consistent global standard for linting.
 get_repolinter_config() {
   local repo="$1"
   local local_config_url="https://raw.githubusercontent.com/$repo/main/.github/repolinter.yaml"
@@ -133,8 +121,17 @@ get_repolinter_config() {
 
 # Lint GitHub repositories within a specified organization using repolinter.
 #
-# Usage:
-#   lint_repos <organization_name>
+# Description:
+#   This function performs linting on all public repositories within the specified GitHub organization
+#   using repolinter. It iterates over each repository, runs repolinter, checks for compliance with 
+#   guidelines and creates a report in the output results.
+#
+#   The linting process involves the following steps:
+#     1. Retrieve the list of public repositories in the organization.
+#     2. For each repository, run repolinter with the provided configuration and output the results
+#        to a markdown file in the results directory.
+#     3. Check the exit code of repolinter. If non-compliant, create an issue in the repository
+#        with linting details.
 #
 lint_repos() {
   local org_name="$1"
