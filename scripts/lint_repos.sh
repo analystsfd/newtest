@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 # Linting all repositories of a Github organization
 #
 # Usage:
@@ -14,6 +14,7 @@
 #   and performs linting using repolinter. For each repository, it creates a directory for the output,
 #   runs repolinter, and checks for compliance. If a repository is non-compliant, it creates or updates
 #   an issue with linting details.
+
 cd "$(dirname "$0")"
 
 # Static configuration
