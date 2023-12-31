@@ -2,7 +2,7 @@
 cd "$(dirname "$0")"
 IFS=$'\n' # keep whitespace when iterating with for loops
 
-
+# Static configuration
 YAML_FILE="../config/repos.yaml"
 
 # Install yq and gh (if not already installed)
@@ -11,6 +11,7 @@ if ! command -v yq &> /dev/null || ! command -v gh &> /dev/null; then
     exit 1
 fi
 
+# Parse command line parameters
 DRY_RUN=true
 DEBUG=false
 while [ $# -gt 0 ]; do
@@ -240,6 +241,18 @@ load_teams() {
         echo "Error fetching teams for allianz-incubator at line $LINENO. $CACHED_ALLIANZ_INCUBATOR_TEAMS."; exit 1; }
 }
 
+load_team_permissions(){
+    local org_name="$1"
+    local team_name="$2"
+    local team_slug=$(get_team_slug $team_name) || exit 1   
+
+    repos_for_team=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/orgs/$org_name/teams/$team_slug/repos?per_page=100") || {
+        echo "Error fetching repositories for team '$team_slug' for '$org_name' at line $LINENO. $existing_repos_for_team.">&2; exit 1; }
+
+    echo $repos_for_team | jq -c '.[].name' | sed 's/"//g'
+}
+
+
 get_teams(){
     local org="$1"
 
@@ -254,8 +267,8 @@ get_team_slug(){
     local name="$1"
 
     # Search for the team in both organizations
-    local slug_allianz=$(jq -r '.[] | select(.name == "'"$name"'") | .slug' <<< "$CACHED_ALLIANZ_TEAMS")
-    local slug_incubator=$(jq -r '.[] | select(.name == "'"$name"'") | .slug' <<< "$CACHED_ALLIANZ_INCUBATOR_TEAMS")
+    local slug_allianz=$(jq -r '.[] | select(.name == "'"$name"'") | .slug' <<< "$CACHED_ALLIANZ_TEAMS") || exit 1
+    local slug_incubator=$(jq -r '.[] | select(.name == "'"$name"'") | .slug' <<< "$CACHED_ALLIANZ_INCUBATOR_TEAMS") || exit 1
 
     # Return the first non-empty slug found
     if [ -n "$slug_allianz" ]; then
@@ -266,18 +279,6 @@ get_team_slug(){
         echo "Error: team slug not found for $name" >&2; exit 1
     fi
 }
-
-load_team_permissions(){
-    local org_name="$1"
-    local team_name="$2"
-    local team_slug=$(get_team_slug $team_name) || exit 1   
-
-    repos_for_team=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/orgs/$org_name/teams/$team_slug/repos?per_page=100") || {
-        echo "Error fetching repositories for team '$team_slug' for '$org_name' at line $LINENO. $existing_repos_for_team.">&2; exit 1; }
-
-    echo $repos_for_team | jq -c '.[].name' | sed 's/"//g'
-}
-
 
 process_repos() {
     echo "READING REPOSITORIES..."
@@ -330,8 +331,8 @@ process_repos() {
     done
 
     # Warnings
-    local inconsistent_repos_in_incubator=$(comm -13 <(echo "$desired_incubator_repos") <(echo "$existing_incubator_repos"))
-    local inconsistent_repos_in_main=$(comm -13 <(echo "$desired_main_repos") <(echo "$existing_main_repos"))
+    local inconsistent_repos_in_incubator=$(comm -13 <(echo "$desired_incubator_repos") <(echo "$existing_incubator_repos")) || exit 1
+    local inconsistent_repos_in_main=$(comm -13 <(echo "$desired_main_repos") <(echo "$existing_main_repos")) || exit 1
     for repo in $inconsistent_repos_in_main; do
         warning_messages+="> \"$repo\" repository exists in allianz but is missing in config file.\n"
     done
@@ -346,13 +347,13 @@ process_teams() {
     echo -e "READING $org_name TEAMS..."
     
     # Status
-    local existing_teams=$(get_teams $org_name | jq -r '.[].name') || exit 1
+    local existing_teams=$(get_teams $org_name | jq -r '.[].name' | sort) || exit 1
     local desired_teams=$(yq eval '.repositories[] | select(.stage == "'"$org_name"'") | .teams[].name' "$YAML_FILE" | sort -u) || exit 1
 
     # Calculate changes
-    local teams_to_add=$(comm -23 <(echo "$desired_teams") <(echo "$existing_teams" | sort)) || exit 1
-    local teams_to_update=$(comm -12 <(echo "$desired_teams" | sort) <(echo "$existing_teams" | sort)) || exit 1
-    local teams_to_remove=$(comm -13 <(echo "$desired_teams") <(echo "$existing_teams" | sort)) || exit 1
+    local teams_to_add=$(comm -23 <(echo "$desired_teams") <(echo "$existing_teams")) || exit 1
+    local teams_to_update=$(comm -12 <(echo "$desired_teams") <(echo "$existing_teams")) || exit 1
+    local teams_to_remove=$(comm -13 <(echo "$desired_teams") <(echo "$existing_teams" )) || exit 1
 
     # Debug
     print_debug
@@ -386,8 +387,8 @@ process_teams() {
     for team in $teams_to_update; do
 
         # Status
-        local existing_repos_for_team=$(load_team_permissions $org_name $team) || exit 1
-        local desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' ../config/repos.yaml | sort -u)
+        local existing_repos_for_team=$(load_team_permissions $org_name $team | sort) || exit 1
+        local desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' ../config/repos.yaml | sort -u) || exit 1
         
         # Debug
         print_debug "  $team"
@@ -398,8 +399,8 @@ process_teams() {
         print_debug "$desired_repos_for_team" | sed 's/^/        /'
 
         # Calculate changes
-        local repos_to_add=$(comm -23 <(echo "$desired_repos_for_team") <(echo "$existing_repos_for_team" | sort))
-        local repos_to_remove=$(comm -13 <(echo "$desired_repos_for_team") <(echo "$existing_repos_for_team" | sort))
+        local repos_to_add=$(comm -23 <(echo "$desired_repos_for_team") <(echo "$existing_repos_for_team")) || exit 1
+        local repos_to_remove=$(comm -13 <(echo "$desired_repos_for_team") <(echo "$existing_repos_for_team")) || exit 1
         
         # Debug
         print_debug "    changes:"
