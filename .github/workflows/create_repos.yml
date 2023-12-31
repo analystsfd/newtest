@@ -16,6 +16,7 @@ jobs:
 
   apply:
     needs: dry-run
+    environment: github.com
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
