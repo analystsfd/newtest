@@ -3,8 +3,10 @@
 # GitHub Management Script
 #
 # Usage: ./create_repos.sh [--apply] [--debug]
-#   --apply  : Apply changes to GitHub (default is dry-run mode).
-#   --debug  : Enable debug mode for additional information.
+#
+# Parameters:
+#   --apply: Apply changes to GitHub (default is dry-run mode).
+#   --debug: Enable debug mode for additional information.
 #
 # Description:
 #   This Bash script automates GitHub repository and team management based on a YAML configuration file.
