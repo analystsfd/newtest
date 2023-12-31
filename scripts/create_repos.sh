@@ -1,9 +1,15 @@
 #!/bin/bash
 #
 # GitHub Management Script
-# This Bash script automates GitHub repository and team management based on a YAML configuration file.
-# It uses GitHub CLI (gh) and yq for interaction and configuration parsing, respectively.
-# The script can create, transfer, and synchronize repositories and teams, and it supports dry-run mode.
+#
+# Usage: ./create_repos.sh [--apply] [--debug]
+#   --apply  : Apply changes to GitHub (default is dry-run mode).
+#   --debug  : Enable debug mode for additional information.
+#
+# Description:
+#   This Bash script automates GitHub repository and team management based on a YAML configuration file.
+#   It uses GitHub CLI (gh) and yq for interaction and configuration parsing, respectively.
+#   The script can create, transfer, and synchronize repositories and teams, and it supports dry-run mode.
 
 cd "$(dirname "$0")"
 IFS=$'\n' # keep whitespace when iterating with for loops
