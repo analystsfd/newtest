@@ -70,7 +70,7 @@ create_repo() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Repository '$name' successfully created in organization $org."
         else
-            echo "Error creating repo. $response."; exit 1;
+            echo "Error creating repo at line $LINENO. $response."; exit 1;
         fi
     fi
 }
@@ -91,7 +91,7 @@ transfer_repo() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Repository '$name' successfully transfered to organization allianz."
         else
-            echo "Error transfering team. $response."; exit 1;
+            echo "Error transfering team at line $LINENO. $response."; exit 1;
         fi
     fi
 }
@@ -127,7 +127,7 @@ create_team() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' created successfully in organization '$org'."
         else
-            echo "Error creating team. $response."; exit 1;
+            echo "Error creating team at line $LINENO. $response."; exit 1;
         fi
     fi
 
@@ -148,7 +148,7 @@ create_team() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' successfully syncing with AD Group '$giam_name'."
         else
-            echo "Error when enabling team sync with AD. $response."; exit 1;
+            echo "Error when enabling team sync with AD at line $LINENO. $response."; exit 1;
         fi
     fi
 }
@@ -169,7 +169,7 @@ delete_team() {
         if [ $? -eq 0 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' deleted successfully in organization '$org'."
         else
-            echo "Error deleting team. $response."; exit 1;
+            echo "Error deleting team at line $LINENO. $response."; exit 1;
         fi
     fi
 }
@@ -193,7 +193,7 @@ add_team_to_repo() {
             if [ $? -eq 0 ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' granted owner prermissions in repository '$repo'."
             else
-                echo "Error granting permissions. $response"; exit 1;
+                echo "Error granting permissions at line $LINENO. $response"; exit 1;
             fi
         fi
     done
@@ -217,10 +217,23 @@ remove_team_from_repo() {
             if [ $? -eq 0 ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' removed owner prermissions in repository '$repo'."
             else
-                echo "Error removing permissions. $repsonse"; exit 1;
+                echo "Error removing permissions at line $LINENO. $repsonse"; exit 1;
             fi
         fi
     done
+}
+
+load_repositories() {
+    local org=$1
+
+    repos=$(gh repo list $org --json name --limit 1000 )|| {
+        echo "Error fetching repos for allianz at line $LINENO. $repos." >&2; exit 1; }
+
+    if [ "$repos" = "[]" ]; then
+        echo "No repositories found for $org (line $LINENO)." >&2; exit 1
+    else
+        echo "$repos" | jq -c '.[].name' | sed 's/"//g' | sort -u
+    fi
 }
 
 
@@ -228,17 +241,15 @@ process_repos() {
     echo "READING REPOSITORIES..."
 
     # Status
-    existing_incubator_repos=$(gh repo list allianz-incubator --json name --limit 1000 | jq -r '.[].name' | sort)|| {
-        echo "Error fetching repos for allianz. $existing_incubator_repos."; exit 1; }
-    existing_main_repos=$(gh repo list allianz --json name --limit 1000 | jq -r '.[].name' | sort)|| {
-        echo "Error fetching repos for allianz. $existing_main_repos."; exit 1; }
-    desired_incubator_repos=$(yq eval '.repositories[] | select(.stage == "allianz-incubator") | .name' "$YAML_FILE" | sort -u)
-    desired_main_repos=$(yq eval '.repositories[] | select(.stage == "allianz") | .name' "$YAML_FILE" | sort -u)
+    existing_main_repos=$(load_repositories allianz) || exit 1
+    existing_incubator_repos=$(load_repositories allianz-incubator) || exit 1
+    desired_main_repos=$(yq eval '.repositories[] | select(.stage == "allianz") | .name' "$YAML_FILE" | sort -u) || exit 1
+    desired_incubator_repos=$(yq eval '.repositories[] | select(.stage == "allianz-incubator") | .name' "$YAML_FILE" | sort -u) || exit 1
 
-    ## changes
-    repos_to_add_in_incubator=$(comm -23 <(echo "$desired_incubator_repos") <(echo "$existing_incubator_repos"))
-    repos_to_add_in_main=$(comm -23 <(comm -23 <(echo "$desired_main_repos") <(echo "$existing_main_repos")) <(echo "$existing_incubator_repos"))
-    repos_to_transfer_to_main=$(comm -12 <(comm -23 <(echo "$desired_main_repos") <(echo "$existing_main_repos")) <(echo "$existing_incubator_repos"))
+    ## calculate changes
+    repos_to_add_in_incubator=$(comm -23 <(echo "$desired_incubator_repos") <(echo "$existing_incubator_repos")) || exit 1
+    repos_to_add_in_main=$(comm -23 <(comm -23 <(echo "$desired_main_repos") <(echo "$existing_main_repos")) <(echo "$existing_incubator_repos")) || exit 1
+    repos_to_transfer_to_main=$(comm -12 <(comm -23 <(echo "$desired_main_repos") <(echo "$existing_main_repos")) <(echo "$existing_incubator_repos")) || exit 1
    
     # Debug
     print_debug
@@ -265,17 +276,13 @@ process_repos() {
     print_debug
 
 
-    # Iterate over the list of repositories to add in incubator
+    # Iterate over changes
     for repo in $repos_to_add_in_incubator; do
         create_repo $repo "allianz-incubator"
     done
-
-    # Iterate over the list of repositories to add in main
     for repo in $repos_to_add_in_main; do
         create_repo $repo "allianz"
     done
-
-    # Iterate over the list of repositories to transfer to main
     for repo in $repos_to_transfer_to_main; do
         transfer_repo $repo
     done
@@ -293,14 +300,14 @@ process_repos() {
 
 fill_teams_cache() {
     CACHED_ALLIANZ_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz/teams) || {
-        echo "Error fetching teams for allianz. $CACHED_ALLIANZ_TEAMS."; exit 1; }
-    echo "Allianz teams: $CACHED_ALLIANZ_TEAMS"
+        echo "Error fetching teams for allianz at line $LINENO. $CACHED_ALLIANZ_TEAMS."; exit 1; }
+
     CACHED_ALLIANZ_INCUBATOR_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz-incubator/teams) || {
-        echo "Error fetching teams for allianz-incubator. $CACHED_ALLIANZ_INCUBATOR_TEAMS."; exit 1; }
+        echo "Error fetching teams for allianz-incubator at line $LINENO. $CACHED_ALLIANZ_INCUBATOR_TEAMS."; exit 1; }
 }
 
 get_teams(){
-    org="$1"
+    local org="$1"
 
     if [ "$org" == "allianz" ]; then
         echo "$CACHED_ALLIANZ_TEAMS"
@@ -310,7 +317,7 @@ get_teams(){
 }
 
 get_team_slug(){
-    name="$1"
+    local name="$1"
 
     # Search for the team in both organizations
     slug_allianz=$(jq -r '.[] | select(.name == "'"$name"'") | .slug' <<< "$CACHED_ALLIANZ_TEAMS")
@@ -322,9 +329,19 @@ get_team_slug(){
     elif [ -n "$slug_incubator" ]; then
         echo "$slug_incubator"
     else
-        echo "Team slug not found for $name"
-        exit 1
+        echo "Error: team slug not found for $name"
     fi
+}
+
+load_team_assignments(){
+    local org_name="$1"
+    local team_name="$2"
+
+    team_slug=$(get_team_slug $team_name) || exit 1   
+    repos_for_team=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/orgs/$org_name/teams/$team_slug/repos?per_page=100") || {
+        echo "Error fetching repositories for team '$team_slug' for '$org_name' at line $LINENO. $existing_repos_for_team.">&2; exit 1; }
+
+    echo $repos_for_team | jq -c '.[].name' | sed 's/"//g'
 }
 
 process_teams() {
@@ -332,13 +349,13 @@ process_teams() {
     echo -e "READING $org_name TEAMS..."
     
     # Status
-    existing_teams=$(get_teams $org_name | jq -r '.[].name')
-    desired_teams=$(yq eval '.repositories[] | select(.stage == "'"$org_name"'") | .teams[].name' "$YAML_FILE" | sort -u)
+    existing_teams=$(get_teams $org_name | jq -r '.[].name') || exit 1
+    desired_teams=$(yq eval '.repositories[] | select(.stage == "'"$org_name"'") | .teams[].name' "$YAML_FILE" | sort -u) || exit 1
 
     # Changes
-    teams_to_add=$(comm -23 <(echo "$desired_teams") <(echo "$existing_teams" | sort))
-    teams_to_update=$(comm -12 <(echo "$desired_teams" | sort) <(echo "$existing_teams" | sort))
-    teams_to_remove=$(comm -13 <(echo "$desired_teams") <(echo "$existing_teams" | sort))
+    teams_to_add=$(comm -23 <(echo "$desired_teams") <(echo "$existing_teams" | sort)) || exit 1
+    teams_to_update=$(comm -12 <(echo "$desired_teams" | sort) <(echo "$existing_teams" | sort)) || exit 1
+    teams_to_remove=$(comm -13 <(echo "$desired_teams") <(echo "$existing_teams" | sort)) || exit 1
 
     # Debug
     print_debug
@@ -354,7 +371,7 @@ process_teams() {
     for team in $teams_to_add; do
     
         # Status
-        desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' "$YAML_FILE" | sort -u)
+        desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' "$YAML_FILE" | sort -u) || exit 1
 
         # Debug
         print_debug "  $team"
@@ -372,8 +389,7 @@ process_teams() {
     for team in $teams_to_update; do
 
         # Status
-        existing_repos_for_team=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/orgs/allianz-incubator/teams/$team/repos?per_page=100" | jq -c '.[].name' | sed 's/"//g') || {
-            echo "Error fetching repositories for teams for allianz. $existing_repos_for_team."; exit 1; }
+        existing_repos_for_team=$(load_team_assignments $org_name $team) || exit 1
         desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' ../config/repos.yaml | sort -u)
         
         # Debug
