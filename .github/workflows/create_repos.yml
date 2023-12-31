@@ -5,6 +5,9 @@ on:
   push:
     paths:
       - 'config/repos.yaml'
+  pull_request:
+    paths:
+      - 'config/repos.yaml'
 
 jobs:
   dry-run:
@@ -21,6 +24,7 @@ jobs:
   apply:
     needs: dry-run
     environment: github.com
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
