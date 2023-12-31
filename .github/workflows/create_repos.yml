@@ -2,9 +2,6 @@
 name: Run create repos
 on:
   workflow_dispatch: null
-  push:
-    paths:
-      - 'config/repos.yaml'
   pull_request:
     paths:
       - 'config/repos.yaml'
