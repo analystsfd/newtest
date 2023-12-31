@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# GitHub Management Script
+# This Bash script automates GitHub repository and team management based on a YAML configuration file.
+# It uses GitHub CLI (gh) and yq for interaction and configuration parsing, respectively.
+# The script can create, transfer, and synchronize repositories and teams, and it supports dry-run mode.
+
 cd "$(dirname "$0")"
 IFS=$'\n' # keep whitespace when iterating with for loops
 
@@ -40,6 +46,7 @@ print_debug() {
 }
 
 
+# Function to validate the structure of the YAML configuration
 validate_yaml() {
     for repo_name in $(yq eval '.repositories[].name' "$YAML_FILE"); do
         if [[ ! "$repo_name" =~ ^[a-z0-9.-]+$ ]]; then
@@ -53,6 +60,8 @@ validate_yaml() {
     done
 }
 
+
+# Function to create a new GitHub repository
 create_repo() {
     local name=$1
     local org=$2
@@ -70,6 +79,8 @@ create_repo() {
     fi
 }
 
+
+# Function to transfer a GitHub repository from one organization to another
 transfer_repo() {
     local name=$1
 
@@ -91,12 +102,14 @@ transfer_repo() {
     fi
 }
 
+
+# Function to create a new GitHub team and set up team synchronization
 create_team() {
     local name=$1
     local org=$2
     local giam_name=$name
 
-    # Get AD group for team sync
+    # Get Azure AD group required for team sync
     local ad_group=$(gh api -XGET \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -108,7 +121,7 @@ create_team() {
         exit 1
     fi
 
-    # Create team
+    # Create the team
     if [ "$DRY_RUN" = true ]; then
         DRY_RUN_MESSAGES+="\e[32m+\e[0m Would create team: '$name' in $org.\n"
     else
@@ -126,7 +139,7 @@ create_team() {
         fi
     fi
 
-    # Add AD group to team to activate team sync
+    # Activate Azure AD team sync by assigning the AD group to the team
     load_teams # Update cache to include new team slug
     local slug_name=$(get_team_slug $name) || exit 1
     if [ "$DRY_RUN" = true ]; then
@@ -147,6 +160,8 @@ create_team() {
     fi
 }
 
+
+# Function to delete a GitHub team
 delete_team() {
     local name=$1
     local org=$2
@@ -169,6 +184,8 @@ delete_team() {
     fi
 }
 
+
+# Function to grant permissions to a team on specified repositories
 grant_permissions() {
     local name=$1
     local org=$2
@@ -195,6 +212,8 @@ grant_permissions() {
     done
 }
 
+
+# Function to revoke permissions from a team on specified repositories
 revoke_permissions() {
     local name=$1
     local org=$2
@@ -220,6 +239,8 @@ revoke_permissions() {
     done
 }
 
+
+# Function to load existing repositories from GitHub
 load_repositories() {
     local org=$1
 
@@ -233,6 +254,8 @@ load_repositories() {
     fi
 }
 
+
+# Function to load existing teams from GitHub
 load_teams() {
     CACHED_ALLIANZ_TEAMS=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/allianz/teams) || {
         echo "Error fetching teams for allianz at line $LINENO. $CACHED_ALLIANZ_TEAMS."; exit 1; }
@@ -241,6 +264,8 @@ load_teams() {
         echo "Error fetching teams for allianz-incubator at line $LINENO. $CACHED_ALLIANZ_INCUBATOR_TEAMS."; exit 1; }
 }
 
+
+# Function to load permissions of a team on repositories
 load_team_permissions(){
     local org_name="$1"
     local team_name="$2"
@@ -253,6 +278,7 @@ load_team_permissions(){
 }
 
 
+# Function to get the list of teams for a given organization
 get_teams(){
     local org="$1"
 
@@ -263,6 +289,8 @@ get_teams(){
     fi
 }
 
+
+# Function to get the slug of a team by its name
 get_team_slug(){
     local name="$1"
 
@@ -280,6 +308,15 @@ get_team_slug(){
     fi
 }
 
+
+# Function to process repositories based on the YAML configuration
+#
+# This function reads the YAML configuration file to determine the desired state of GitHub repositories
+# for both the 'allianz' and 'allianz-incubator' organizations. It then compares this desired state with
+# the existing repositories on GitHub and performs the necessary actions to align them.
+# Actions include creating new repositories, transferring repositories between organizations, and printing
+# warnings for inconsistent repository configurations.
+#
 process_repos() {
     echo "READING REPOSITORIES..."
 
@@ -341,7 +378,18 @@ process_repos() {
     done
 }
 
-
+# Function to process teams based on the YAML configuration and existing teams
+# 
+# This function manages GitHub teams for either the 'allianz' and 'allianz-incubator' organizations,
+# aligning them with the desired state specified in the YAML configuration file.
+# It reads the configuration to determine the desired teams, their associated repositories,
+# and the necessary actions to synchronize them with the existing teams on GitHub.
+#
+# The function identifies teams to be added, updated, or deleted based on the configuration.
+# For teams to be added, it creates the team and grants appropriate permissions on the associated repositories.
+# For existing teams, it updates team memberships and permissions according to the YAML configuration.
+# Teams marked for deletion are removed from GitHub.
+#
 process_teams() {
     local org_name="$1"
     echo -e "READING $org_name TEAMS..."
