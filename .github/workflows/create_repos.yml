@@ -5,6 +5,11 @@ on:
   pull_request:
     paths:
       - 'config/repos.yaml'
+  push:
+    paths:
+      - 'config/repos.yaml'
+    branches:
+      - main
 
 jobs:
   dry-run:
