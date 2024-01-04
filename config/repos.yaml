@@ -22,8 +22,7 @@ repositories:
   - name: "test-permissions"
     stage: allianz-incubator
     teams:
-      - name: "no-ad-test"
+       - name: "Allianz OSPO"
+
   - name: "playground"
     stage: allianz-incubator
-    teams:
-       - name: "Allianz OSPO"

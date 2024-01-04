@@ -79,10 +79,10 @@ create_repo() {
     else
         gh repo create $org/$name --public --template="allianz-incubator/new-project"
 
-        if [ $? -eq 0 ]; then
+        if [ $? -eq 0 ] && [ "$(echo $response | jq -r '.id')" != "null" ]; then
             echo -e "\e[32m✓\e[0m Repository '$name' successfully created in organization $org."
         else
-            echo "Error creating repo at line $LINENO. $response.">&2; exit 1;
+            echo "Error creating repo '$name' at line $LINENO. $response.">&2; exit 1;
         fi
     fi
 }
@@ -102,10 +102,10 @@ transfer_repo() {
             repos/allianz-incubator/$name/transfer \
             -f new_owner=allianz)
 
-        if [ $? -eq 0 ]; then
+        if [ $? -eq 0 ] && [ "$(echo $response | jq -r '.id')" != "null"  ]; then
             echo -e "\e[32m✓\e[0m Repository '$name' successfully transfered to organization allianz."
         else
-            echo "Error transfering team at line $LINENO. $response.">&2; exit 1;
+            echo "Error transfering repo '$name' at line $LINENO. $response.">&2; exit 1;
         fi
     fi
 }
@@ -140,10 +140,10 @@ create_team() {
             /orgs/$org/teams \
            -f name="$name") 
         
-        if [ $? -eq 0 ]; then
+        if [ $? -eq 0 ] && [ "$(echo $response | jq -r '.id')" != "null" ]; then
             echo -e "\e[32m✓\e[0m Team '$name' created successfully in organization '$org'."
         else
-            echo "Error creating team at line $LINENO. $response.">&2; exit 1;
+            echo "Error creating team '$name' at line $LINENO. $response.">&2; exit 1;
         fi
     fi
 
@@ -157,13 +157,13 @@ create_team() {
             --method PATCH   \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /orgs/allianz-incubator/teams/$slug_name/team-sync/group-mappings \
+            /orgs/$org/teams/$slug_name/team-sync/group-mappings \
             --input -)
         
-        if [ $? -eq 0 ]; then
+        if [ $? -eq 0 ] && [ $(echo "$response" | jq '.groups | length') -ge 1 ]; then
             echo -e "\e[32m✓\e[0m Team '$name' successfully syncing with AD Group '$giam_name'."
         else
-            echo "Error when enabling team sync with AD at line $LINENO. $response.">&2; exit 1;
+            echo "Error when enabling team sync of '$slug_name' with AD '$giam_name' at line $LINENO. $response.">&2; exit 1;
         fi
     fi
 }
@@ -173,7 +173,7 @@ create_team() {
 delete_team() {
     local name=$1
     local org=$2
-    local slug_mame=$(get_team_slug $name) || exit 1
+    local slug_name=$(get_team_slug $name) || exit 1
 
     if [ "$DRY_RUN" = true ]; then
         DRY_RUN_MESSAGES+="\e[31m-\e[0m Would delete team: $name in $org.\n"
@@ -184,10 +184,10 @@ delete_team() {
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /orgs/$org/teams/$slug_name) 
         
-        if [ $? -eq 0 ]; then
+        if [ $? -eq 0 ] && [ -z "$response" ]; then
             echo -e "\e[32m✓\e[0m Team '$name' deleted successfully in organization '$org'."
         else
-            echo "Error deleting team at line $LINENO. $response.">&2; exit 1;
+            echo "Error deleting team '$slug_name' at line $LINENO. $response.">&2; exit 1;
         fi
     fi
 }
@@ -211,10 +211,10 @@ grant_permissions() {
                 /orgs/$org/teams/$slug_name/repos/$org/$repo \
                 -f permission='push')
 
-            if [ $? -eq 0 ]; then
+            if [ $? -eq 0 ] && [ -z "$response" ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' granted owner prermissions in repository '$repo'."
             else
-                echo "Error granting permissions at line $LINENO. $response">&2; exit 1;
+                echo "Error granting permissions for team '$slug_name' to repo '$repo' at line $LINENO. $response">&2; exit 1;
             fi
         fi
     done
@@ -238,10 +238,10 @@ revoke_permissions() {
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 /orgs/$org/teams/$slug_name/repos/$org/$repo)
 
-            if [ $? -eq 0 ]; then
+            if [ $? -eq 0 ] && [ -z "$response" ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' removed owner prermissions in repository '$repo'."
             else
-                echo "Error removing permissions at line $LINENO. $repsonse">&2; exit 1;
+                echo "Error removing permissions of team '$slug_name' from repo '$repo' at line $LINENO. $repsonse">&2; exit 1;
             fi
         fi
     done
