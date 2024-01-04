@@ -258,7 +258,7 @@ load_repositories() {
     if [ "$repos" = "[]" ]; then
         echo "No repositories found for $org (line $LINENO)." >&2; exit 1
     else
-        echo "$repos" | jq -c '.[].name' | sed 's/"//g' | sort -u
+        echo "$repos" | jq -r '.[].name' | sort -u
     fi
 }
 
@@ -282,7 +282,7 @@ load_team_permissions(){
     repos_for_team=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/orgs/$org_name/teams/$team_slug/repos?per_page=100") || {
         echo "Error fetching repositories for team '$team_slug' for '$org_name' at line $LINENO. $existing_repos_for_team.">&2; exit 1; }
 
-    echo $repos_for_team | jq -c '.[].name' | sed 's/"//g'
+    echo $repos_for_team | jq -r '.[].name'
 }
 
 
