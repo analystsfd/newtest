@@ -18,10 +18,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create repositories and teams
+      - name: Plan github organization changes
+        id: plan
         env:
-          GH_TOKEN: ${{ secrets.TOKEN }}
-        run: scripts/create_repos.sh --debug
+          GH_TOKEN: ${{secrets.TOKEN}}
+        run: scripts/create_repos.sh 
+
+      - name: Add output to PR comment
+        uses: actions/github-script@v5
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: process.env['PLAN']
+            })
 
   apply:
     needs: dry-run
@@ -34,5 +50,5 @@ jobs:
 
       - name: Create repositories and teams
         env:
-          GH_TOKEN: ${{ secrets.TOKEN }}
+          GH_TOKEN: ${{secrets.TOKEN}}
         run: scripts/create_repos.sh --apply
