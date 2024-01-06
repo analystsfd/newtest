@@ -21,6 +21,9 @@ repositories:
     stage: allianz
   - name: "test-permissions"
     stage: allianz-incubator
- 
   - name: "playground"
     stage: allianz-incubator
+  - name: "test-christoph"
+    stage: "allianz-incubator"
+    
+
