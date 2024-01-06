@@ -75,7 +75,7 @@ create_repo() {
     local org=$2
 
     if [ "$DRY_RUN" = true ]; then
-        DRY_RUN_MESSAGES+="\e[32m+\e[0m Would create repository: $name in $org.\n"
+        DRY_RUN_MESSAGES+="+ Would create repository: $name in $org.\n"
     else
         gh repo create $org/$name --public --template="allianz-incubator/new-project"
 
@@ -131,7 +131,7 @@ create_team() {
 
     # Create the team
     if [ "$DRY_RUN" = true ]; then
-        DRY_RUN_MESSAGES+="\e[32m+\e[0m Would create team: '$name' in $org.\n"
+        DRY_RUN_MESSAGES+="+ Would create team: '$name' in $org.\n"
     else
         local response=$(gh api \
            --method POST \
@@ -151,7 +151,7 @@ create_team() {
     load_teams # Update cache to include new team slug
     local slug_name=$(get_team_slug $name) || exit 1
     if [ "$DRY_RUN" = true ]; then
-        DRY_RUN_MESSAGES+="\e[32m+\e[0m Would setup team sync: team '$name' with AD Group '$giam_name'.\n"
+        DRY_RUN_MESSAGES+="+ Would setup team sync: team '$name' with AD Group '$giam_name'.\n"
     else
         local response=$(echo $ad_group | gh api \
             --method PATCH   \
@@ -176,7 +176,7 @@ delete_team() {
     local slug_name=$(get_team_slug $name) || exit 1
 
     if [ "$DRY_RUN" = true ]; then
-        DRY_RUN_MESSAGES+="\e[31m-\e[0m Would delete team: $name in $org.\n"
+        DRY_RUN_MESSAGES+="- Would delete team: $name in $org.\n"
     else
         local response=$(gh api \
             --method DELETE \
@@ -202,7 +202,7 @@ grant_permissions() {
 
     for repo in $repos_to_assign; do
         if [ "$DRY_RUN" = true ]; then
-            DRY_RUN_MESSAGES+="\e[32m+\e[0m Would grant owner permission: team '$name' in $org/$repo.\n"
+            DRY_RUN_MESSAGES+="+ Would grant owner permission: team '$name' in $org/$repo.\n"
         else
             local response=$(gh api \
                 --method PUT \
@@ -230,7 +230,7 @@ revoke_permissions() {
 
     for repo in $repos_to_remove; do
         if [ "$DRY_RUN" = true ]; then
-            DRY_RUN_MESSAGES+="\e[31m-\e[0m Would remove owner permission: team '$name' in $org/$repo.\n"
+            DRY_RUN_MESSAGES+="- Would remove owner permission: team '$name' in $org/$repo.\n"
         else
             local response=$(gh api \
                 --method DELETE \
@@ -373,16 +373,6 @@ process_repos() {
     done
     for repo in $repos_to_transfer_to_main; do
         transfer_repo $repo
-    done
-
-    # Warnings
-    local inconsistent_repos_in_incubator=$(comm -13 <(echo "$desired_incubator_repos") <(echo "$existing_incubator_repos")) || exit 1
-    local inconsistent_repos_in_main=$(comm -13 <(echo "$desired_main_repos") <(echo "$existing_main_repos")) || exit 1
-    for repo in $inconsistent_repos_in_main; do
-        warning_messages+="> \"$repo\" repository exists in allianz but is missing in config file.\n"
-    done
-    for repo in $inconsistent_repos_in_incubator; do
-        warning_messages+="> \"$repo\" repository exists in allianz-incubator but is missing in config file.\n"
     done
 }
 
