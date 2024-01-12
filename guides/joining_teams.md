@@ -4,7 +4,7 @@
 
 If you haven't done so yet, joining the *github.com/allianz* organization is the first step before becoming a part of a team. To do so, follow these steps:
 
-1. Open GIAM and search for "Allianz Open Source" ([details](/))
+1. Open GIAM and search for "Allianz Open Source" ([details](https://allianzms.sharepoint.com/:u:/r/teams/DE1214-6256295/SitePages/Order-Allianz-Open-Source.aspx?csf=1&web=1&share=Ec2kpyWDp51FqZszJ9kvJH4BgYafc1EnTus8H2_IRdCzMg&e=uSVOfj))
 2. Order the item.
 
 After these initial steps, you will receive a Github invitation after a few days. Before accepting, continue with the following steps:
