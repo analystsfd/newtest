@@ -1,26 +1,47 @@
+# Configuration File for GitHub Repositories
+# 
+# This file manages settings for GitHub repositories within the Allianz organization.
+# New repositories start in the "allianz-incubator" stage and may be promoted to "allianz" as they mature.
+
+# Parameters:
+#   - name: Repository name. Use only lowercase letters and dashes.
+#   - stage: Choose between "allianz" or "allianz-incubator".
+#   - team name: Must be identical to the corresponding GIAM group.
 repositories:
+
   - name: ".github"
     stage: allianz
+
   - name: "ospo"
     stage: allianz
+
   - name: "new-project"
     stage: allianz-incubator
+
   - name: "ng-aquila"
     stage: allianz
+
   - name: "calculus-prime-pnc"
     stage: allianz
+
   - name: "gem-config"
     stage: allianz
+
   - name: "license-scout"
     stage: allianz
+
   - name: "merge-bot"
     stage: allianz
+
   - name: "merge-bot-config"
     stage: allianz
+
   - name: "merge-processor"
     stage: allianz
+
   - name: "test-permissions"
     stage: allianz-incubator
+
   - name: "playground"
     stage: allianz-incubator
     teams:

@@ -25,8 +25,8 @@ At Allianz, we support open source initiatives through this open community. From
 * Moving from Incubator
 * Archiving a Repository
 5. **Team Management**
-* Creating Teams
 * [Joining Teams](guides/joining_teams.md)
+* [Creating Teams](guides/creating_teams.md)
 * Access Control
 6. **Security**
 * Vulnerability Reporting
