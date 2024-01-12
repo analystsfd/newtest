@@ -118,15 +118,22 @@ create_team() {
     local giam_name=$name
 
     # Get Azure AD group required for team sync
-    local ad_group=$(gh api -XGET \
+    local ad_groups=$(gh api -XGET \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
         -F q="$giam_name" /orgs/$org/team-sync/groups)
-    
-    if [[ ! "$ad_group" == *'"groups":'* || $(jq '.groups | length' <<< "$ad_group") -ne 1 ]]; then
-        echo "Error: No or more than one AD group with name '$giam_name' found.">&2;
-        echo $ad_group | jq '.groups[].group_name'
-        exit 1
+ 
+    if [ $? -eq 0 ] && [ "$(echo "$ad_groups" | jq -e '.groups')" == "null" ]; then
+        echo "Error reading AD groups for name '$giam_name' at line $LINENO. $ad_groups.">&2; exit 1;
+    fi
+
+    # Remove all prefix name matches and keep only exact matches
+    local ad_group=$(echo "$ad_groups" | jq --arg exact_match "$giam_name" '.groups |= map(select(.group_name == $exact_match))')
+    if [ "$(echo "$ad_group" | jq -r '.groups | length')" -eq 0 ]; then
+        echo "Error: No AD group with name '$giam_name' found.">&2; exit 1;
+    fi
+    if [ "$(echo "$ad_group" | jq -r '.groups | length')" -ne 1 ]; then
+        echo "Error: More than one AD group with name '$giam_name' found.">&2; exit 1;
     fi
 
     # Create the team
@@ -148,11 +155,11 @@ create_team() {
     fi
 
     # Activate Azure AD team sync by assigning the AD group to the team
-    load_teams # Update cache to include new team slug
-    local slug_name=$(get_team_slug $name) || exit 1
     if [ "$DRY_RUN" = true ]; then
         DRY_RUN_MESSAGES+="+ Would setup team sync: team '$name' with AD Group '$giam_name'.\n"
     else
+        load_teams # Update cache to include new team slug
+        local slug_name=$(get_team_slug $name) || exit 1
         local response=$(echo $ad_group | gh api \
             --method PATCH   \
             -H "Accept: application/vnd.github+json" \
@@ -173,11 +180,11 @@ create_team() {
 delete_team() {
     local name=$1
     local org=$2
-    local slug_name=$(get_team_slug $name) || exit 1
 
     if [ "$DRY_RUN" = true ]; then
         DRY_RUN_MESSAGES+="- Would delete team: $name in $org.\n"
     else
+        local slug_name=$(get_team_slug $name) || exit 1
         local response=$(gh api \
             --method DELETE \
             -H "Accept: application/vnd.github+json" \
@@ -198,12 +205,12 @@ grant_permissions() {
     local name=$1
     local org=$2
     local repos_to_assign=$3
-    local slug_name=$(get_team_slug $name) || exit 1
 
     for repo in $repos_to_assign; do
         if [ "$DRY_RUN" = true ]; then
             DRY_RUN_MESSAGES+="+ Would grant owner permission: team '$name' in $org/$repo.\n"
         else
+            local slug_name=$(get_team_slug $name) || exit 1
             local response=$(gh api \
                 --method PUT \
                 -H "Accept: application/vnd.github+json" \
@@ -226,12 +233,12 @@ revoke_permissions() {
     local name=$1
     local org=$2
     local repos_to_remove=$3
-    local slug_name=$(get_team_slug $name)
 
     for repo in $repos_to_remove; do
         if [ "$DRY_RUN" = true ]; then
             DRY_RUN_MESSAGES+="- Would remove owner permission: team '$name' in $org/$repo.\n"
         else
+            local slug_name=$(get_team_slug $name)
             local response=$(gh api \
                 --method DELETE \
                 -H "Accept: application/vnd.github+json" \
