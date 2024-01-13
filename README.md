@@ -14,20 +14,19 @@ At Allianz, we support open source initiatives through this open community. From
 * Overview of Open Source
 * Benefits and Challenges
 2. **Contributing Guidelines**
-* Code of Conduct
-* Code Review Process
+* [Code of Conduct](https://github.com/allianz/.github/blob/main/CODE_OF_CONDUCT.md)
+* [Code Review Process](guides/code_review_process.md)
 3. **Licensing**
 * Overview of Open Source Licenses
 * Choosing a License for Projects
 4. **Repository Lifecycle**
 * [Creating a Repository](guides/release.md)
-* Linting and Compliance
+* [Linting and Compliance](guides/linting_and_compliance.md)
 * Moving from Incubator
-* Archiving a Repository
+* [Archiving a Repository](guides/archiving_a_repository.md)
 5. **Team Management**
 * [Joining Teams](guides/joining_teams.md)
 * [Creating Teams](guides/creating_teams.md)
-* Access Control
 6. **Security**
 * Vulnerability Reporting
 * Dependabot
