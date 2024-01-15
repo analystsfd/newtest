@@ -1,4 +1,4 @@
-# Joining Teams 
+# Joining a Team 
 
 ## 1. Join the Github Organization
 
