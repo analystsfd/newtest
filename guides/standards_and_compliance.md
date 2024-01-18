@@ -1,4 +1,4 @@
-# Linting and Compliance
+# Standards and Compliance
 
 In order to maintain consistency across our repositories, the following settings and resources are mandatory:
 
