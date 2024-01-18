@@ -29,9 +29,9 @@ At Allianz, we support open source initiatives through this open community. From
 * [Creating a Team](guides/creating_a_team.md)
 #### 6. Security
 * Vulnerability Reporting
-* Dependabot
-* Security Scanning
-* Secret Scanning
+* [Dependabot](guides/dependabot.md)
+* [Code Scanning](guides/code_scanning.md)
+* [Secret Scanning](guides/secret_scanning.md)
 
 
 ## Contact
