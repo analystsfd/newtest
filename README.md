@@ -18,6 +18,7 @@ At Allianz, we support open source initiatives through this open community. From
 #### 1. Contributing Guidelines
 * [Code of Conduct](https://github.com/allianz/.github/blob/main/CODE_OF_CONDUCT.md)
 * [Code Review Process](guides/code_review_process.md)
+* [DCO](guides/dco.md)
 <!--
 #### 3. Licensing
 * Overview of Open Source Licenses
@@ -32,7 +33,7 @@ At Allianz, we support open source initiatives through this open community. From
 * [Joining a Team](guides/joining_a_team.md)
 * [Creating a Team](guides/creating_a_team.md)
 #### 4. Security
-* Vulnerability Reporting
+* [Vulnerability Reporting](https://github.com/allianz/.github/blob/main/SECURITY.md)
 * [Dependabot](guides/dependabot.md)
 * [Code Scanning](guides/code_scanning.md)
 * [Secret Scanning](guides/secret_scanning.md)
