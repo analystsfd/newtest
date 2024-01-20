@@ -1,6 +1,6 @@
 # Code Scanning
 
-GitHub Code Scanning is a security feature for identifying and reporting security vulnerabilities in the codebase. This automated process is enabled by default and runs on every commit and pull request.
+GitHub Code Scanning is a security feature designed to identify and report security vulnerabilities in the codebase. The process runs on every commit and pull request. GitHub Code Scanning is enabled by default for all repositories within the Allianz GitHub organization.
 
 GitHub Code Scanning utilizes the code analysis engine CodeQL. The supported languages are:
 

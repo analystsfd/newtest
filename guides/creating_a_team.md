@@ -1,6 +1,6 @@
 # Creating a Team
 
-In essence, the access to GitHub repositories is entirely facilitated through GIAM. All user access requests are initiated and approved through GIAM. Technically, GitHub teams act as a thin wrapper around GIAM groups, and are created implicitly on the fly when modifying repository assignments.
+The access to GitHub repositories is entirely facilitated through GIAM. All user access requests are initiated and approved through GIAM. Technically, GitHub teams act only as a thin wrapper around GIAM groups, and are created implicitly on the fly when modifying repository assignments.
 
 Note: A single team can be assigned to multiple repositories, and conversely, one repository can have multiple teams assigned. 
 
