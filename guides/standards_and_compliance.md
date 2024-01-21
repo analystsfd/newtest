@@ -10,7 +10,7 @@ In order to maintain consistency across our repositories, the following settings
 
 4. **Readme File**: A comprehensive readme file providing essential information about the project, its setup, and usage. ([How-to Create](https://docs.github.com/de/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes))
 
-5. **Maintainer File**: A file specifying maintainers, with the recommendation to include work email addresses for direct contact. ([]())
+5. **Maintainer File**: A file specifying maintainers, with the recommendation to include work email addresses for direct contact. ([Example](https://github.com/allianz-incubator/new-project/blob/main/MAINTAINERS))
 
 6. **Contributing File**: A guide for contributors explaining how to contribute to the project. ([How-to Create](https://docs.github.com/de/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors))
 
