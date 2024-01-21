@@ -6,7 +6,7 @@ The following steps must be taken to release a new open source project:
 2. **Get approval**. Obtain business line approval.
 
 3. **Name your project**. 
-   - Check that it does [not conflict with an existing project](http://ivantomic.com/projects/ospnc/) or infringe on any [trademarks](https://www.uspto.gov). 
+   - Check that it does not conflict with an existing project or infringe on any [trademarks](https://www.trademarkia.com/). 
    - Don’t use a Allianz brand name.
    - Avoid using a third-party brand name. In certain cases you can use them as descriptors. For example, you can use “Test Libraries for Java” but don’t call something “Java Test Libraries.”
    - Don’t use unclear names. e.g. “Foundation Server”
@@ -39,8 +39,9 @@ in a `NOTICE` file.
      // SPDX-FileCopyrightText: Allianz and others
      // SPDX-License-Identifier: MIT
      ```
-
-6. **Publish the code**. Once business approval is granted and code is prepared, create an issue in `XXX` repo and request that a new GitHub repository is created
+6. **Publish the code**. 
+     - Once business approval is granted and code is prepared, create an issue in `XXX` repo and request that a new GitHub repository is created.
+     - Create a new Azure security group in GIAM to manage repository access ([details](https://allianzms.sharepoint.com/:u:/r/teams/DE1214-6256295/SitePages/Create-Azure-Security-Group.aspx?csf=1&web=1&share=EfrPwMMX75xNsyVxYMxXFLgBapAXQHGFz9OpuVGTnT0YAw&e=QyKoaB)). The group name is flexible, allowing spaces and capitalized letters. 
 7. **Going forward**.
    - **Staffing**. Ensure at least one team member is committed to managing community interactions merging pull requests, giving feedback, releasing new versions.
    - **Maintaining**. Make your life easier as an open source maintainer, [from documenting processes to leveraging your community](https://opensource.guide/best-practices/).
