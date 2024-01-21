@@ -13,4 +13,6 @@ GitHub Code Scanning utilizes the code analysis engine CodeQL. The supported lan
 * Ruby
 * Swift
 
-This broad language support ensures comprehensive security analysis for a diverse range of projects. For detailed instructions on using GitHub Code Scanning with these languages, please refer to the official GitHub Code Scanning Documentation
+Compiled languages must be built during the analysis process. In many cases, no configuration is required. However, in some cases, a custom configuration might be necessary. In such a case, GitHub will display an error message and provide guidance through the necessary steps.
+
+![Scanning error](failure.PNG) 

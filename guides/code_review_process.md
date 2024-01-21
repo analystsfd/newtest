@@ -1,8 +1,8 @@
 # Code Review Process
 
-Git workflows are an important part of the code review processes. *Github Flow* and *Gitflow* are the two most used processes. GitHub Flow is a more modern and simpler approach compared to Gitflow's comprehensive branching model. Given its extensive adoption by open-source projects, it is recommended to utilize [Github Flow](https://docs.github.com/en/get-started/quickstart/github-flow).
+Git workflows play a crucial role in the code review process. Two notable methodologies are *GitHub Flow* and *GitFlow*. Despite their similar names, they represent distinct concepts. GitHub Flow is characterized by a modern and simplified approach, contrasting with Gitflow's comprehensive branching model.
 
-Working with Github Flow:
+Working with [Github Flow](https://docs.github.com/en/get-started/quickstart/github-flow):
 1. Create an issue, if not existing yet, to discuss what you want to implement
 2. Fork the repository and create your branch from master
 3. Push changes to your fork and open a pull request 
