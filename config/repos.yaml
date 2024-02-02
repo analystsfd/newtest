@@ -46,3 +46,8 @@ repositories:
     stage: allianz-incubator
     teams:
     - name: "Allianz OSPO"
+
+  - name: "demo"
+    stage: allianz-incubator
+    teams:
+    - name: "Allianz OSPO"
