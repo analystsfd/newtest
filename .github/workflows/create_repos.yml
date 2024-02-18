@@ -2,7 +2,7 @@
 name: Run create repos
 on:
   workflow_dispatch: null
-  pull_request:
+  pull_request_target:
     paths:
       - 'config/repos.yaml'
   push:
