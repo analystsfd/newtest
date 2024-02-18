@@ -216,7 +216,7 @@ grant_permissions() {
                 -H "Accept: application/vnd.github+json" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 /orgs/$org/teams/$slug_name/repos/$org/$repo \
-                -f permission='push')
+                -f permission='Own')
 
             if [ $? -eq 0 ] && [ -z "$response" ]; then
                 echo -e "\e[32m✓\e[0m Team '$name' granted owner prermissions in repository '$repo'."
