@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download modified config file from forked repository
+        if: github.event_name == 'pull_request_target'
         run: |
           curl -sSL -H "Authorization: token ${{ secrets.TOKEN }}" \
           -H "Accept: application/vnd.github.v3.raw" \
