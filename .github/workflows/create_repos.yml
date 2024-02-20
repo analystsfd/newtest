@@ -57,7 +57,7 @@ jobs:
   apply:
     needs: dry-run
     environment: github.com
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request_target'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
