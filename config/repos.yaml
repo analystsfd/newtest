@@ -20,6 +20,8 @@ repositories:
 
   - name: "ng-aquila"
     stage: allianz
+    teams:
+    - name: "ng-aquila"
 
   - name: "calculus-prime-pnc"
     stage: allianz
