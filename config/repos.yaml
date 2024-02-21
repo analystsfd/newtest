@@ -14,6 +14,8 @@ repositories:
 
   - name: "ospo"
     stage: allianz
+    teams:
+    - name: "Allianz OSPO"
 
   - name: "new-project"
     stage: allianz-incubator

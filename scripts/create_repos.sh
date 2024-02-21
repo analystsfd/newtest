@@ -145,7 +145,8 @@ create_team() {
            -H "Accept: application/vnd.github+json" \
            -H "X-GitHub-Api-Version: 2022-11-28" \
             /orgs/$org/teams \
-           -f name="$name") 
+           -f name="$name" \
+           -f privacy='closed' ) 
         
         if [ $? -eq 0 ] && [ "$(echo $response | jq -r '.id')" != "null" ]; then
             echo -e "\e[32m✓\e[0m Team '$name' created successfully in organization '$org'."
@@ -422,7 +423,7 @@ process_teams() {
     for team in $teams_to_add; do
     
         # Status
-        local desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' "$YAML_FILE" | sort -u) || exit 1
+        local desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'" and .stage == "'"$org_name"'") | .name' "$YAML_FILE" | sort -u) || exit 1
 
         # Debug
         print_debug "  $team"
@@ -441,7 +442,7 @@ process_teams() {
 
         # Status
         local existing_repos_for_team=$(load_team_permissions $org_name $team | sort) || exit 1
-        local desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'") | .name' ../config/repos.yaml | sort -u) || exit 1
+        local desired_repos_for_team=$(yq eval '.repositories[] | select(.teams[].name == "'"$team"'" and .stage == "'"$org_name"'") | .name' ../config/repos.yaml | sort -u) || exit 1
         
         # Debug
         print_debug "  $team"
