@@ -19,5 +19,6 @@ After this initial step, you will receive a Github invitation after a few days. 
 2. Open GIAM and search for the specific group name.
 3. Order the item.
 
+For those who created the GIAM group, it's important to note that they must also order the group themselves. The ordering process for creators differs from the standard procedure and is detailed [here](https://allianzms.sharepoint.com/:u:/r/teams/DE1214-6256295/SitePages/Order-own-GIAM-group.aspx?csf=1&web=1&e=DF2jNc).
 
 
