@@ -6,7 +6,7 @@
 # Parameters:
 #   - name: Repository name. Use only lowercase letters and dashes.
 #   - stage: Choose between "allianz" or "allianz-incubator".
-#   - team name: Must be identical to the corresponding GIAM group.
+#   - team name: Must be identical to the corresponding GIAM group....
 repositories:
 
   - name: ".github"
